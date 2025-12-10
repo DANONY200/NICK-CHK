@@ -3,83 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Gerador de Nicks Minecraft v4 (Fast & Precise)</title>
+    <title>MC Nick Gen v5 Elite</title>
     <style>
-        :root { --bg:#0f0f13; --surface:#1e1e24; --accent:#ff3e3e; --accent-hover:#d32f2f; --text:#f0f0f0; --sub:#888; --ok:#4caf50; --border:#333; }
-        *{box-sizing:border-box;font-family:'Segoe UI',Roboto,sans-serif;transition:all .2s}
-        body{margin:0;padding:20px;background:var(--bg);color:var(--text);display:flex;justify-content:center;min-height:100vh}
-        .container{width:100%;max-width:800px;display:grid;gap:20px;grid-template-columns:1fr}
-        @media(min-width:600px){.container{grid-template-columns:1fr 1fr}}
-        section{background:var(--surface);padding:24px;border-radius:12px;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,0.3)}
-        h1, h2{margin-top:0;font-weight:700;letter-spacing:-0.5px;color:var(--text)}
-        h1{font-size:1.5rem} h2{font-size:1.2rem}
-        .control-group{margin-bottom:12px}
-        label{display:block;margin-bottom:6px;font-size:.85rem;color:var(--sub);font-weight:600}
-        input,select,button{width:100%;padding:10px 12px;border-radius:6px;border:1px solid var(--border);background:#15151a;color:var(--text);font-size:14px;outline:none}
-        input:focus,select:focus{border-color:var(--accent)}
-        button{cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;border:none}
-        #startButton{background:var(--accent);color:#fff;margin-top:10px}
-        #startButton:hover{background:var(--accent-hover);transform:translateY(-2px)}
-        #startButton:disabled{opacity:0.5;transform:none;cursor:not-allowed}
-        #stopButton{background:#444;margin-top:10px}
-        #stopButton:hover:not(:disabled){background:#555}
-        .chk-label{display:flex;align-items:center;gap:10px;cursor:pointer;background:#25252c;padding:10px;border-radius:6px;margin-top:5px}
-        input[type="checkbox"]{width:auto;margin:0;accent-color:var(--accent)}
-        ul{list-style:none;padding:0;margin:0;background:#121216;border-radius:8px;height:300px;overflow-y:auto;border:1px solid var(--border)}
-        li{padding:8px 12px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;animation:fadeIn .3s ease}
-        li:last-child{border-bottom:none}
-        li span{font-family:'Consolas',monospace;color:var(--ok);font-weight:bold}
-        .copy-btn{width:auto;padding:4px 8px;background:transparent;border:1px solid var(--sub);color:var(--sub);font-size:0.75rem;border-radius:4px}
-        .copy-btn:hover{border-color:var(--ok);color:var(--ok)}
-        #stats{margin-top:10px;font-size:.85rem;color:var(--sub);text-align:center;padding:8px;background:#25252c;border-radius:4px}
-        .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
-        .actions button{margin:0;background:#2a2a35}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+        :root{--bg:#09090b;--surface:#18181b;--primary:#8b5cf6;--primary-hover:#7c3aed;--text:#e4e4e7;--sub:#a1a1aa;--success:#22c55e;--border:#27272a;--danger:#ef4444}
+        *{box-sizing:border-box;margin:0;padding:0;outline:none;font-family:'Inter',system-ui,-apple-system,sans-serif}
+        body{background-color:var(--bg);color:var(--text);display:flex;justify-content:center;min-height:100vh;padding:20px}
+        .app-container{width:100%;max-width:900px;display:grid;gap:24px;grid-template-columns:1fr}
+        @media(min-width:768px){.app-container{grid-template-columns:350px 1fr}}
+        .panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 10px 15px -3px rgba(0,0,0,0.3)}
+        h1,h2{font-size:1.25rem;font-weight:700;letter-spacing:-0.025em;color:#fff}
+        .input-group{display:flex;flex-direction:column;gap:6px}
+        label{font-size:0.875rem;color:var(--sub);font-weight:500}
+        input,select{background:#27272a;border:1px solid #3f3f46;color:#fff;padding:10px 12px;border-radius:8px;font-size:0.9rem;transition:border-color .15s}
+        input:focus,select:focus{border-color:var(--primary)}
+        .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        .checkbox-wrapper{display:flex;align-items:center;gap:10px;padding:12px;background:#27272a;border-radius:8px;cursor:pointer;border:1px solid #3f3f46}
+        input[type="checkbox"]{width:16px;height:16px;accent-color:var(--primary);cursor:pointer}
+        button{padding:12px;border-radius:8px;border:none;font-weight:600;cursor:pointer;transition:all .2s;font-size:0.9rem}
+        .btn-primary{background:var(--primary);color:#fff}
+        .btn-primary:hover:not(:disabled){background:var(--primary-hover)}
+        .btn-danger{background:var(--danger);color:#fff;display:none}
+        .btn-danger:hover{background:#dc2626}
+        button:disabled{opacity:0.5;cursor:not-allowed}
+        .results-area{flex:1;display:flex;flex-direction:column;min-height:500px}
+        .stats-bar{background:#27272a;padding:12px;border-radius:8px;display:flex;justify-content:space-between;font-size:0.85rem;color:var(--sub);font-family:'JetBrains Mono',monospace}
+        .nick-list{flex:1;overflow-y:auto;background:#0f0f12;border-radius:8px;border:1px solid var(--border);margin:10px 0;padding:0}
+        .nick-item{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #27272a;animation:slideIn 0.2s ease-out}
+        .nick-item:hover{background:#1f1f23}
+        .nick-text{font-family:'JetBrains Mono',monospace;color:var(--success);font-weight:700;font-size:1rem}
+        .copy-btn{background:transparent;border:1px solid var(--sub);color:var(--sub);padding:4px 10px;font-size:0.75rem;border-radius:6px}
+        .copy-btn:hover{border-color:#fff;color:#fff}
+        .actions-bar{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        .btn-sec{background:#3f3f46;color:#fff}
+        .btn-sec:hover:not(:disabled){background:#52525b}
+        @keyframes slideIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+        ::-webkit-scrollbar{width:6px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:10px}
     </style>
 </head>
 <body>
-<div class="container">
-    <section>
-        <h1>Gerador de Nicks v4</h1>
-        <div class="control-group">
-            <label>Comprimento (3-16):</label>
-            <input type="number" id="length" value="5" min="3" max="16">
+<div class="app-container">
+    <section class="panel">
+        <h1>Configuração</h1>
+        <div class="row">
+            <div class="input-group">
+                <label>Letras (Min-Max)</label>
+                <div style="display:flex;gap:5px">
+                    <input type="number" id="lenMin" value="3" min="3" max="16">
+                    <input type="number" id="lenMax" value="5" min="3" max="16">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Meta</label>
+                <input type="number" id="amount" value="50" min="1">
+            </div>
         </div>
-        <div class="control-group">
-            <label>Quantidade a encontrar:</label>
-            <input type="number" id="amount" value="10" min="1">
+        <div class="input-group">
+            <label>Prefixo (Opcional)</label>
+            <input type="text" id="prefix" maxlength="3" placeholder="Ex: z">
         </div>
-        <div class="control-group">
-            <label>Primeira letra (Opcional):</label>
-            <input type="text" id="firstLetter" maxlength="1" placeholder="Ex.: z">
-        </div>
-        <div class="control-group">
-            <label>Algoritmo de Geração:</label>
-            <select id="charset">
-                <option value="letters">Aleatório (Apenas Letras)</option>
-                <option value="pronounceable">Pronunciável (Consoante+Vogal)</option>
-                <option value="letters_digits">Letras + Números</option>
-                <option value="full">Completo (Letras, Números, _)</option>
+        <div class="input-group">
+            <label>Tipo de Geração</label>
+            <select id="algo">
+                <option value="random">Aleatório (A-Z)</option>
+                <option value="pronounce">Pronunciável (Realista)</option>
+                <option value="mixed">Alfanumérico (A-Z, 0-9)</option>
+                <option value="og">OG/Raro (Sem números)</option>
             </select>
         </div>
-        <label class="chk-label">
-            <input type="checkbox" id="useUnderscore">
-            <span>Inserir Underscore (_) aleatório</span>
+        <label class="checkbox-wrapper">
+            <input type="checkbox" id="underscore">
+            <span>Permitir Underscore (_)</span>
         </label>
-        <label class="chk-label">
+        <label class="checkbox-wrapper">
             <input type="checkbox" id="turbo">
-            <span>Modo Turbo (Alta Velocidade)</span>
+            <span>Modo Turbo (High CPU)</span>
         </label>
-        <button id="startButton">🚀 Iniciar Geração</button>
-        <button id="stopButton" disabled>🛑 Parar</button>
+        <button id="btnStart" class="btn-primary">INICIAR BUSCA</button>
+        <button id="btnStop" class="btn-danger">PARAR</button>
     </section>
-    <section>
-        <h2>Nicks Disponíveis</h2>
-        <ul id="resultsList"></ul>
-        <div id="stats">Aguardando início...</div>
-        <div class="actions">
-            <button id="copyAllBtn" disabled>Copiar Lista</button>
-            <button id="downloadBtn" disabled>Baixar .txt</button>
+
+    <section class="panel results-area">
+        <h2>Resultados</h2>
+        <div class="stats-bar">
+            <span id="statRate">0 PPS</span>
+            <span id="statFound">0 / 0</span>
+        </div>
+        <ul id="list" class="nick-list"></ul>
+        <div class="actions-bar">
+            <button id="btnCopy" class="btn-sec" disabled>Copiar Tudo</button>
+            <button id="btnDown" class="btn-sec" disabled>Salvar .txt</button>
         </div>
     </section>
 </div>
