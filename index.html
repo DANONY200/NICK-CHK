@@ -3,37 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MC Nick Gen v5 Elite</title>
+    <title>MC Nick Gen v6 (Multi-API & Safe)</title>
     <style>
-        :root{--bg:#09090b;--surface:#18181b;--primary:#8b5cf6;--primary-hover:#7c3aed;--text:#e4e4e7;--sub:#a1a1aa;--success:#22c55e;--border:#27272a;--danger:#ef4444}
+        :root{--bg:#09090b;--surface:#18181b;--primary:#6366f1;--primary-hover:#4f46e5;--text:#e4e4e7;--sub:#a1a1aa;--success:#10b981;--border:#27272a;--danger:#ef4444}
         *{box-sizing:border-box;margin:0;padding:0;outline:none;font-family:'Inter',system-ui,-apple-system,sans-serif}
         body{background-color:var(--bg);color:var(--text);display:flex;justify-content:center;min-height:100vh;padding:20px}
         .app-container{width:100%;max-width:900px;display:grid;gap:24px;grid-template-columns:1fr}
-        @media(min-width:768px){.app-container{grid-template-columns:350px 1fr}}
+        @media(min-width:768px){.app-container{grid-template-columns:340px 1fr}}
         .panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 10px 15px -3px rgba(0,0,0,0.3)}
-        h1,h2{font-size:1.25rem;font-weight:700;letter-spacing:-0.025em;color:#fff}
+        h1,h2{font-size:1.2rem;font-weight:700;letter-spacing:-0.025em;color:#fff;display:flex;align-items:center;gap:8px}
+        .badge{font-size:0.7rem;background:var(--primary);padding:2px 8px;border-radius:12px;text-transform:uppercase}
         .input-group{display:flex;flex-direction:column;gap:6px}
-        label{font-size:0.875rem;color:var(--sub);font-weight:500}
+        label{font-size:0.8rem;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
         input,select{background:#27272a;border:1px solid #3f3f46;color:#fff;padding:10px 12px;border-radius:8px;font-size:0.9rem;transition:border-color .15s}
         input:focus,select:focus{border-color:var(--primary)}
         .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
         .checkbox-wrapper{display:flex;align-items:center;gap:10px;padding:12px;background:#27272a;border-radius:8px;cursor:pointer;border:1px solid #3f3f46}
         input[type="checkbox"]{width:16px;height:16px;accent-color:var(--primary);cursor:pointer}
-        button{padding:12px;border-radius:8px;border:none;font-weight:600;cursor:pointer;transition:all .2s;font-size:0.9rem}
-        .btn-primary{background:var(--primary);color:#fff}
-        .btn-primary:hover:not(:disabled){background:var(--primary-hover)}
+        button{padding:12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;transition:all .2s;font-size:0.9rem;display:flex;justify-content:center;align-items:center;gap:8px}
+        .btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(99,102,241,0.2)}
+        .btn-primary:hover:not(:disabled){background:var(--primary-hover);transform:translateY(-1px)}
         .btn-danger{background:var(--danger);color:#fff;display:none}
         .btn-danger:hover{background:#dc2626}
-        button:disabled{opacity:0.5;cursor:not-allowed}
-        .results-area{flex:1;display:flex;flex-direction:column;min-height:500px}
-        .stats-bar{background:#27272a;padding:12px;border-radius:8px;display:flex;justify-content:space-between;font-size:0.85rem;color:var(--sub);font-family:'JetBrains Mono',monospace}
-        .nick-list{flex:1;overflow-y:auto;background:#0f0f12;border-radius:8px;border:1px solid var(--border);margin:10px 0;padding:0}
-        .nick-item{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #27272a;animation:slideIn 0.2s ease-out}
+        button:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+        .results-area{flex:1;display:flex;flex-direction:column;min-height:550px}
+        .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+        .stat-box{background:#27272a;padding:10px;border-radius:8px;text-align:center;border:1px solid var(--border)}
+        .stat-val{display:block;font-family:'JetBrains Mono',monospace;font-size:1.1rem;color:#fff;font-weight:700}
+        .stat-lbl{font-size:0.7rem;color:var(--sub);text-transform:uppercase}
+        .nick-list{flex:1;overflow-y:auto;background:#0f0f12;border-radius:8px;border:1px solid var(--border);padding:0;position:relative}
+        .nick-item{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #27272a;animation:slideIn 0.2s ease-out}
         .nick-item:hover{background:#1f1f23}
-        .nick-text{font-family:'JetBrains Mono',monospace;color:var(--success);font-weight:700;font-size:1rem}
+        .nick-text{font-family:'JetBrains Mono',monospace;color:var(--success);font-weight:700;font-size:1.05rem}
+        .verified-icon{color:var(--primary);font-size:0.8rem;margin-left:8px;background:rgba(99,102,241,0.1);padding:2px 6px;border-radius:4px}
         .copy-btn{background:transparent;border:1px solid var(--sub);color:var(--sub);padding:4px 10px;font-size:0.75rem;border-radius:6px}
-        .copy-btn:hover{border-color:#fff;color:#fff}
-        .actions-bar{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        .copy-btn:hover{border-color:var(--success);color:var(--success)}
+        .actions-bar{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:auto}
         .btn-sec{background:#3f3f46;color:#fff}
         .btn-sec:hover:not(:disabled){background:#52525b}
         @keyframes slideIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
@@ -45,18 +50,18 @@
 <body>
 <div class="app-container">
     <section class="panel">
-        <h1>Configuração</h1>
+        <h1>Gerador v6 <span class="badge">PRO</span></h1>
         <div class="row">
             <div class="input-group">
-                <label>Letras (Min-Max)</label>
+                <label>Tamanho (Min-Max)</label>
                 <div style="display:flex;gap:5px">
                     <input type="number" id="lenMin" value="3" min="3" max="16">
                     <input type="number" id="lenMax" value="5" min="3" max="16">
                 </div>
             </div>
             <div class="input-group">
-                <label>Meta</label>
-                <input type="number" id="amount" value="50" min="1">
+                <label>Quantidade</label>
+                <input type="number" id="amount" value="20" min="1">
             </div>
         </div>
         <div class="input-group">
@@ -64,7 +69,7 @@
             <input type="text" id="prefix" maxlength="3" placeholder="Ex: z">
         </div>
         <div class="input-group">
-            <label>Tipo de Geração</label>
+            <label>Algoritmo</label>
             <select id="algo">
                 <option value="random">Aleatório (A-Z)</option>
                 <option value="pronounce">Pronunciável (Realista)</option>
@@ -74,26 +79,32 @@
         </div>
         <label class="checkbox-wrapper">
             <input type="checkbox" id="underscore">
-            <span>Permitir Underscore (_)</span>
+            <span>Usar Underscore (_)</span>
         </label>
         <label class="checkbox-wrapper">
             <input type="checkbox" id="turbo">
             <span>Modo Turbo (High CPU)</span>
         </label>
         <button id="btnStart" class="btn-primary">INICIAR BUSCA</button>
-        <button id="btnStop" class="btn-danger">PARAR</button>
+        <button id="btnStop" class="btn-danger">PARAR TUDO</button>
     </section>
 
     <section class="panel results-area">
-        <h2>Resultados</h2>
-        <div class="stats-bar">
-            <span id="statRate">0 PPS</span>
-            <span id="statFound">0 / 0</span>
+        <h2>Nicks Disponíveis</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="stat-val" id="statRate">0</span>
+                <span class="stat-lbl">Checks/seg</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-val" id="statFound">0 / 0</span>
+                <span class="stat-lbl">Encontrados</span>
+            </div>
         </div>
         <ul id="list" class="nick-list"></ul>
         <div class="actions-bar">
-            <button id="btnCopy" class="btn-sec" disabled>Copiar Tudo</button>
-            <button id="btnDown" class="btn-sec" disabled>Salvar .txt</button>
+            <button id="btnCopy" class="btn-sec" disabled>Copiar Lista</button>
+            <button id="btnDown" class="btn-sec" disabled>Baixar .txt</button>
         </div>
     </section>
 </div>
