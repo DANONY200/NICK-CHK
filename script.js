@@ -1,5 +1,4 @@
 const $ = i => document.getElementById(i);
-const c = (t,p) => document.createElement(t);
 
 const state = {
     running: false,
@@ -7,8 +6,7 @@ const state = {
     target: 0,
     attempts: 0,
     startTs: 0,
-    cache: new Set(),
-    apiIndex: 0
+    cache: new Set()
 };
 
 const dom = {
@@ -29,8 +27,11 @@ const dom = {
 };
 
 const apis = [
-    u => `https://api.ashcon.app/mojang/v2/user/${u}`,
-    u => `https://mush.com.br/api/player/${u}`
+    { url: u => `https://api.ashcon.app/mojang/v2/user/${u}`, type: 'json' },
+    { url: u => `https://mush.com.br/api/player/${u}`, type: 'json' },
+    { url: u => `https://dl.labymod.net/usernames/${u}`, type: 'json' },
+    { url: u => `https://crafatar.com/avatars/${u}`, type: 'img' },
+    { url: u => `https://minotar.net/avatar/${u}`, type: 'img' }
 ];
 
 const chars = {
@@ -40,20 +41,13 @@ const chars = {
     n: '0123456789'
 };
 
-const getUrl = (nick) => {
-    state.apiIndex = (state.apiIndex + 1) % apis.length;
-    return apis[state.apiIndex](nick);
-};
-
-function rnd(a) { return a[Math.floor(Math.random() * a.length)]; }
+function rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 function makeNick(min, max, type, pre, useUnd) {
-    const len = Math.floor(Math.random() * (max - min + 1)) + min;
+    let len = Math.floor(Math.random() * (max - min + 1)) + min;
     let n = pre ? pre.toLowerCase() : '';
-    
     if (n.length >= len) return n.substring(0, len);
-
-    const rem = len - n.length;
+    let rem = len - n.length;
 
     if (type === 'pronounce') {
         let isV = n.length > 0 ? !chars.v.includes(n.slice(-1)) : Math.random() > 0.5;
@@ -65,59 +59,81 @@ function makeNick(min, max, type, pre, useUnd) {
         let pool = chars.a;
         if (type === 'mixed') pool += chars.n;
         if (type === 'og') pool = chars.a;
-        
         for (let i = 0; i < rem; i++) n += rnd(pool);
     }
-
-    if (useUnd && n.length > 3 && !n.includes('_') && Math.random() > 0.7) {
-        const pos = Math.floor(Math.random() * (n.length - 2)) + 1;
-        n = n.slice(0, pos) + '_' + n.slice(pos + 1);
+    if (useUnd && n.length > 3 && !n.includes('_') && Math.random() > 0.6) {
+        let idx = Math.floor(Math.random() * (n.length - 2)) + 1;
+        n = n.slice(0, idx) + '_' + n.slice(idx + 1);
     }
     return n;
 }
 
-async function check(nick) {
+async function fetchApi(nick, apiIdx) {
+    const api = apis[apiIdx];
+    const ctrl = new AbortController();
+    const id = setTimeout(() => ctrl.abort(), 2000);
     try {
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), 2000);
-        const res = await fetch(getUrl(nick), { signal: controller.signal });
+        const res = await fetch(api.url(nick), { signal: ctrl.signal });
         clearTimeout(id);
         
-        if (res.status === 404) return true;
-        if (res.status === 200) return false;
-        return false;
+        if (api.type === 'img') {
+            return res.status === 404; 
+        }
+        return res.status === 404; 
     } catch {
-        return false;
+        return false; 
     }
+}
+
+async function verifyNick(nick) {
+    const idx1 = Math.floor(Math.random() * apis.length);
+    const free1 = await fetchApi(nick, idx1);
+    
+    if (!free1) return false;
+
+    let idx2 = (idx1 + 1) % apis.length;
+    const free2 = await fetchApi(nick, idx2);
+    
+    return free2;
 }
 
 function uiAdd(nick) {
     const li = document.createElement('li');
     li.className = 'nick-item';
-    li.innerHTML = `<span class="nick-text">${nick}</span><button class="copy-btn">Copiar</button>`;
+    li.innerHTML = `
+        <div>
+            <span class="nick-text">${nick}</span>
+            <span class="verified-icon" title="Verificado em múltiplas APIs">✓ VERIFICADO</span>
+        </div>
+        <button class="copy-btn">Copiar</button>`;
     
     li.querySelector('button').onclick = (e) => {
         navigator.clipboard.writeText(nick);
-        e.target.textContent = 'Feito!';
-        setTimeout(() => e.target.textContent = 'Copiar', 1000);
+        e.target.textContent = 'Copiado';
+        e.target.style.borderColor = 'var(--success)';
+        e.target.style.color = 'var(--success)';
+        setTimeout(() => {
+            e.target.textContent = 'Copiar';
+            e.target.style = '';
+        }, 1500);
     };
     
     dom.list.insertBefore(li, dom.list.firstChild);
-    if (dom.list.children.length > 100) dom.list.lastChild.remove();
-    
+    if (dom.list.children.length > 150) dom.list.lastChild.remove();
     dom.copy.disabled = false;
     dom.save.disabled = false;
 }
 
-async function loop() {
-    const concurrency = dom.turbo.checked ? 150 : 30;
+async function engine() {
+    const maxConc = dom.turbo.checked ? 100 : 20;
     let active = 0;
 
-    const tick = async () => {
+    const worker = async () => {
         if (!state.running || state.found >= state.target) return;
 
-        if (active < concurrency) {
+        if (active < maxConc) {
             active++;
+            
             const min = +dom.min.value;
             const max = +dom.max.value;
             const type = dom.algo.value;
@@ -125,43 +141,42 @@ async function loop() {
             const und = dom.und.checked;
 
             let nick;
+            let safety = 0;
             do {
                 nick = makeNick(min, max, type, pre, und);
-            } while (state.cache.has(nick));
+                safety++;
+            } while (state.cache.has(nick) && safety < 100);
             
             state.cache.add(nick);
-            if (state.cache.size > 50000) state.cache.clear();
+            if (state.cache.size > 100000) state.cache.clear();
 
-            check(nick).then(free => {
+            verifyNick(nick).then(isFree => {
                 state.attempts++;
-                if (free) {
+                if (isFree && state.running && state.found < state.target) {
                     state.found++;
                     uiAdd(nick);
                 }
             }).finally(() => {
                 active--;
-                tick();
+                worker();
             });
-
-            tick();
+            
+            worker();
         } else {
-            setTimeout(tick, 10);
+            setTimeout(worker, 50);
         }
     };
-
-    tick();
+    worker();
 }
 
-function updateStats() {
+function statsLoop() {
     if (!state.running) return;
-    const now = Date.now();
-    const sec = (now - state.startTs) / 1000;
-    const pps = Math.round(state.attempts / (sec || 1));
-    dom.rate.textContent = `${pps} PPS`;
+    const elap = (Date.now() - state.startTs) / 1000;
+    dom.rate.textContent = Math.floor(state.attempts / (elap || 1));
     dom.count.textContent = `${state.found} / ${state.target}`;
     
     if (state.found < state.target) {
-        requestAnimationFrame(updateStats);
+        requestAnimationFrame(statsLoop);
     } else {
         toggle(false);
     }
@@ -169,8 +184,8 @@ function updateStats() {
 
 function toggle(on) {
     state.running = on;
-    dom.start.style.display = on ? 'none' : 'block';
-    dom.stop.style.display = on ? 'block' : 'none';
+    dom.start.style.display = on ? 'none' : 'flex';
+    dom.stop.style.display = on ? 'flex' : 'none';
     
     if (on) {
         state.found = 0;
@@ -179,8 +194,8 @@ function toggle(on) {
         state.startTs = Date.now();
         dom.list.innerHTML = '';
         state.cache.clear();
-        loop();
-        updateStats();
+        engine();
+        statsLoop();
     }
 }
 
@@ -191,13 +206,15 @@ dom.copy.onclick = () => {
     const txt = [...dom.list.querySelectorAll('.nick-text')].map(s => s.textContent).join('\n');
     navigator.clipboard.writeText(txt);
     dom.copy.textContent = 'Copiado!';
-    setTimeout(() => dom.copy.textContent = 'Copiar Tudo', 2000);
+    setTimeout(() => dom.copy.textContent = 'Copiar Lista', 2000);
 };
 
 dom.save.onclick = () => {
     const txt = [...dom.list.querySelectorAll('.nick-text')].map(s => s.textContent).join('\n');
+    const blob = new Blob([txt], {type: 'text/plain'});
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([txt], {type: 'text/plain'}));
-    a.download = `nicks_${Date.now()}.txt`;
+    a.href = url;
+    a.download = `nicks_verificados_${Date.now()}.txt`;
     a.click();
 };
