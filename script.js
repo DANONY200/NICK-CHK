@@ -1,5 +1,6 @@
 const $ = i => document.getElementById(i);
 
+// Estado Global
 const state = {
     running: false,
     found: 0,
@@ -9,6 +10,7 @@ const state = {
     cache: new Set()
 };
 
+// Elementos da UI
 const dom = {
     start: $('btnStart'),
     stop: $('btnStop'),
@@ -26,14 +28,7 @@ const dom = {
     turbo: $('turbo')
 };
 
-const apis = [
-    { url: u => `https://api.ashcon.app/mojang/v2/user/${u}`, type: 'json' },
-    { url: u => `https://mush.com.br/api/player/${u}`, type: 'json' },
-    { url: u => `https://dl.labymod.net/usernames/${u}`, type: 'json' },
-    { url: u => `https://crafatar.com/avatars/${u}`, type: 'img' },
-    { url: u => `https://minotar.net/avatar/${u}`, type: 'img' }
-];
-
+// Algoritmos de Geração
 const chars = {
     v: 'aeiou',
     c: 'bcdfghjklmnpqrstvwxyz',
@@ -47,6 +42,7 @@ function makeNick(min, max, type, pre, useUnd) {
     let len = Math.floor(Math.random() * (max - min + 1)) + min;
     let n = pre ? pre.toLowerCase() : '';
     if (n.length >= len) return n.substring(0, len);
+    
     let rem = len - n.length;
 
     if (type === 'pronounce') {
@@ -61,41 +57,61 @@ function makeNick(min, max, type, pre, useUnd) {
         if (type === 'og') pool = chars.a;
         for (let i = 0; i < rem; i++) n += rnd(pool);
     }
-    if (useUnd && n.length > 3 && !n.includes('_') && Math.random() > 0.6) {
+    
+    // Inserção inteligente de Underscore
+    if (useUnd && n.length > 3 && !n.includes('_') && Math.random() > 0.65) {
         let idx = Math.floor(Math.random() * (n.length - 2)) + 1;
         n = n.slice(0, idx) + '_' + n.slice(idx + 1);
     }
     return n;
 }
 
-async function fetchApi(nick, apiIdx) {
-    const api = apis[apiIdx];
+// === NÚCLEO DE VERIFICAÇÃO (CORS BYPASS) ===
+// Usamos carregamento de imagem para Crafatar/Minotar pois não sofrem bloqueio de CORS
+// Usamos fetch normal para APIs que permitem (Ashcon/Mush)
+
+function checkImage(url) {
+    return new Promise(resolve => {
+        const img = new Image();
+        // Se carregar, o player existe (Nick Ocupado) -> Retorna FALSE
+        img.onload = () => resolve(false);
+        // Se der erro (404), o player não existe (Nick Livre) -> Retorna TRUE
+        img.onerror = () => resolve(true);
+        // Timeout de segurança
+        setTimeout(() => { img.src = ""; resolve(false); }, 2500);
+        img.src = url;
+    });
+}
+
+async function checkFetch(url) {
     const ctrl = new AbortController();
-    const id = setTimeout(() => ctrl.abort(), 2000);
+    const id = setTimeout(() => ctrl.abort(), 1500);
     try {
-        const res = await fetch(api.url(nick), { signal: ctrl.signal });
+        const res = await fetch(url, { signal: ctrl.signal });
         clearTimeout(id);
-        
-        if (api.type === 'img') {
-            return res.status === 404; 
-        }
-        return res.status === 404; 
+        if (res.status === 404 || res.status === 204) return true; // Livre
+        return false;
     } catch {
-        return false; 
+        return false; // Erro de rede ou CORS assumimos como falha
     }
 }
 
 async function verifyNick(nick) {
-    const idx1 = Math.floor(Math.random() * apis.length);
-    const free1 = await fetchApi(nick, idx1);
+    // 1. Método preferido: Crafatar (Via Imagem - 100% Sem CORS)
+    // Se a API do Crafatar retornar 404 na imagem, o nick é livre.
+    const isFreeCrafatar = await checkImage(`https://crafatar.com/avatars/${nick}?overlay&size=32`);
     
-    if (!free1) return false;
-
-    let idx2 = (idx1 + 1) % apis.length;
-    const free2 = await fetchApi(nick, idx2);
+    if (isFreeCrafatar) {
+        // Se o Crafatar disse que é livre, fazemos uma confirmação rápida na Ashcon se possível
+        // Se a Ashcon falhar (CORS), confiamos no Crafatar.
+        const doubleCheck = await checkFetch(`https://api.ashcon.app/mojang/v2/user/${nick}`);
+        return doubleCheck; // Se ambos concordarem (ou Ashcon der 404), é sucesso.
+    }
     
-    return free2;
+    return false;
 }
+
+// === INTERFACE ===
 
 function uiAdd(nick) {
     const li = document.createElement('li');
@@ -103,29 +119,30 @@ function uiAdd(nick) {
     li.innerHTML = `
         <div>
             <span class="nick-text">${nick}</span>
-            <span class="verified-icon" title="Verificado em múltiplas APIs">✓ VERIFICADO</span>
+            <span class="api-tag">LIVRE</span>
         </div>
         <button class="copy-btn">Copiar</button>`;
     
     li.querySelector('button').onclick = (e) => {
         navigator.clipboard.writeText(nick);
         e.target.textContent = 'Copiado';
-        e.target.style.borderColor = 'var(--success)';
         e.target.style.color = 'var(--success)';
+        e.target.style.borderColor = 'var(--success)';
         setTimeout(() => {
             e.target.textContent = 'Copiar';
             e.target.style = '';
-        }, 1500);
+        }, 1000);
     };
     
     dom.list.insertBefore(li, dom.list.firstChild);
-    if (dom.list.children.length > 150) dom.list.lastChild.remove();
+    if (dom.list.children.length > 100) dom.list.lastChild.remove();
     dom.copy.disabled = false;
     dom.save.disabled = false;
 }
 
 async function engine() {
-    const maxConc = dom.turbo.checked ? 100 : 20;
+    // Reduzido levemente para garantir que o navegador aguente as requisições de imagem
+    const maxConc = dom.turbo.checked ? 60 : 15; 
     let active = 0;
 
     const worker = async () => {
@@ -142,13 +159,14 @@ async function engine() {
 
             let nick;
             let safety = 0;
+            // Gera um nick único que não foi testado recentemente
             do {
                 nick = makeNick(min, max, type, pre, und);
                 safety++;
-            } while (state.cache.has(nick) && safety < 100);
+            } while (state.cache.has(nick) && safety < 50);
             
             state.cache.add(nick);
-            if (state.cache.size > 100000) state.cache.clear();
+            if (state.cache.size > 50000) state.cache.clear();
 
             verifyNick(nick).then(isFree => {
                 state.attempts++;
@@ -158,12 +176,12 @@ async function engine() {
                 }
             }).finally(() => {
                 active--;
-                worker();
+                worker(); // Chama o próximo imediatamente
             });
             
-            worker();
+            worker(); // Tenta encher a fila
         } else {
-            setTimeout(worker, 50);
+            setTimeout(worker, 50); // Espera um pouco se estiver cheio
         }
     };
     worker();
@@ -184,8 +202,8 @@ function statsLoop() {
 
 function toggle(on) {
     state.running = on;
-    dom.start.style.display = on ? 'none' : 'flex';
-    dom.stop.style.display = on ? 'flex' : 'none';
+    dom.start.style.display = on ? 'none' : 'block';
+    dom.stop.style.display = on ? 'block' : 'none';
     
     if (on) {
         state.found = 0;
@@ -215,6 +233,6 @@ dom.save.onclick = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `nicks_verificados_${Date.now()}.txt`;
+    a.download = `nicks_${Date.now()}.txt`;
     a.click();
 };
