@@ -97,11 +97,11 @@ function makeNick(min, max, type, pre, useUnd) {
         nick = nick.slice(0, i) + '_' + nick.slice(i + 1);
     }
 
-    return nick;
+    return nick.toLowerCase(); // 🔥 garante lowercase
 }
 
 /* =======================
-   VERIFICAÇÃO
+   VERIFICAÇÃO (CORRIGIDA)
 ======================= */
 function checkImage(url, timeout = 2000) {
     return new Promise(resolve => {
@@ -116,8 +116,8 @@ function checkImage(url, timeout = 2000) {
             }
         };
 
-        img.onload = () => finish(false);
-        img.onerror = () => finish(true);
+        img.onload = () => finish(false); // Ocupado
+        img.onerror = () => finish(true);  // Livre
         img.src = `${url}&t=${Date.now()}`;
 
         setTimeout(() => finish(false), timeout);
@@ -142,9 +142,18 @@ async function checkFetch(url, timeout = 1500) {
 }
 
 async function verifyNick(nick) {
-    const free = await checkImage(`https://crafatar.com/avatars/${nick}?size=32`);
-    if (!free) return false;
-    return checkFetch(`https://api.ashcon.app/mojang/v2/user/${nick}`);
+    // 🔥 NORMALIZAÇÃO CASE-INSENSITIVE
+    const normalized = nick.toLowerCase();
+
+    const freeCrafatar = await checkImage(
+        `https://crafatar.com/avatars/${normalized}?overlay&size=32`
+    );
+
+    if (!freeCrafatar) return false;
+
+    return checkFetch(
+        `https://api.ashcon.app/mojang/v2/user/${normalized}`
+    );
 }
 
 /* =======================
@@ -286,4 +295,4 @@ dom.save.onclick = () => {
     a.href = URL.createObjectURL(blob);
     a.download = `nicks_${Date.now()}.txt`;
     a.click();
-};
+}
