@@ -41,9 +41,11 @@ function rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function makeNick(min, max, type, pre, useUnd) {
     let len = Math.floor(Math.random() * (max - min + 1)) + min;
     let n = pre ? pre.toLowerCase() : '';
+    
+    // Se o prefixo já for maior ou igual ao tamanho, retorna cortado
     if (n.length >= len) return n.substring(0, len);
     
-    let rem = len - n.length;
+    let rem = len - n.length; // Quantos caracteres faltam
 
     if (type === 'pronounce') {
         let isV = n.length > 0 ? !chars.v.includes(n.slice(-1)) : Math.random() > 0.5;
@@ -51,14 +53,27 @@ function makeNick(min, max, type, pre, useUnd) {
             n += rnd(isV ? chars.v : chars.c);
             isV = !isV;
         }
-    } else {
+    } 
+    // === ALGORITMO NUMÉRICO + LETRA NO FINAL ===
+    else if (type === 'num_suffix') {
+        // Preenche com números até faltar 1 caractere
+        for (let i = 0; i < rem - 1; i++) {
+            n += rnd(chars.n);
+        }
+        // Se ainda sobrar espaço (rem > 0), coloca uma letra no final
+        if (rem > 0) {
+            n += rnd(chars.a);
+        }
+    }
+    // ===========================================
+    else {
         let pool = chars.a;
         if (type === 'mixed') pool += chars.n;
         if (type === 'og') pool = chars.a;
         for (let i = 0; i < rem; i++) n += rnd(pool);
     }
     
-    // Inserção inteligente de Underscore
+    // Inserção inteligente de Underscore (opcional)
     if (useUnd && n.length > 3 && !n.includes('_') && Math.random() > 0.65) {
         let idx = Math.floor(Math.random() * (n.length - 2)) + 1;
         n = n.slice(0, idx) + '_' + n.slice(idx + 1);
@@ -67,17 +82,11 @@ function makeNick(min, max, type, pre, useUnd) {
 }
 
 // === NÚCLEO DE VERIFICAÇÃO (CORS BYPASS) ===
-// Usamos carregamento de imagem para Crafatar/Minotar pois não sofrem bloqueio de CORS
-// Usamos fetch normal para APIs que permitem (Ashcon/Mush)
-
 function checkImage(url) {
     return new Promise(resolve => {
         const img = new Image();
-        // Se carregar, o player existe (Nick Ocupado) -> Retorna FALSE
-        img.onload = () => resolve(false);
-        // Se der erro (404), o player não existe (Nick Livre) -> Retorna TRUE
-        img.onerror = () => resolve(true);
-        // Timeout de segurança
+        img.onload = () => resolve(false); // Carregou = Ocupado
+        img.onerror = () => resolve(true); // Erro = Livre (provavelmente)
         setTimeout(() => { img.src = ""; resolve(false); }, 2500);
         img.src = url;
     });
@@ -89,25 +98,22 @@ async function checkFetch(url) {
     try {
         const res = await fetch(url, { signal: ctrl.signal });
         clearTimeout(id);
-        if (res.status === 404 || res.status === 204) return true; // Livre
+        if (res.status === 404 || res.status === 204) return true;
         return false;
     } catch {
-        return false; // Erro de rede ou CORS assumimos como falha
+        return false; 
     }
 }
 
 async function verifyNick(nick) {
-    // 1. Método preferido: Crafatar (Via Imagem - 100% Sem CORS)
-    // Se a API do Crafatar retornar 404 na imagem, o nick é livre.
+    // 1. Crafatar (Bypass CORS via Imagem)
     const isFreeCrafatar = await checkImage(`https://crafatar.com/avatars/${nick}?overlay&size=32`);
     
     if (isFreeCrafatar) {
-        // Se o Crafatar disse que é livre, fazemos uma confirmação rápida na Ashcon se possível
-        // Se a Ashcon falhar (CORS), confiamos no Crafatar.
+        // 2. Double check na Ashcon
         const doubleCheck = await checkFetch(`https://api.ashcon.app/mojang/v2/user/${nick}`);
-        return doubleCheck; // Se ambos concordarem (ou Ashcon der 404), é sucesso.
+        return doubleCheck;
     }
-    
     return false;
 }
 
@@ -141,7 +147,6 @@ function uiAdd(nick) {
 }
 
 async function engine() {
-    // Reduzido levemente para garantir que o navegador aguente as requisições de imagem
     const maxConc = dom.turbo.checked ? 60 : 15; 
     let active = 0;
 
@@ -159,7 +164,6 @@ async function engine() {
 
             let nick;
             let safety = 0;
-            // Gera um nick único que não foi testado recentemente
             do {
                 nick = makeNick(min, max, type, pre, und);
                 safety++;
@@ -176,12 +180,12 @@ async function engine() {
                 }
             }).finally(() => {
                 active--;
-                worker(); // Chama o próximo imediatamente
+                worker(); 
             });
             
-            worker(); // Tenta encher a fila
+            worker(); 
         } else {
-            setTimeout(worker, 50); // Espera um pouco se estiver cheio
+            setTimeout(worker, 50); 
         }
     };
     worker();
