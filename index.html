@@ -1,848 +1,197 @@
-Faça uma análise bem rígida no meu código e me informe Oq eu devo melhora e faça melhoria fazendo um relatório de tudo q foi alterado
-
-
-index.html
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MC Nick Gen v7 (CORS Bypass)</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MC Nick Gen v7</title>
+
 <style>
-:root{--bg:#09090b;--surface:#18181b;--primary:#3b82f6;--primary-hover:#2563eb;--text:#e4e4e7;--sub:#a1a1aa;--success:#22c55e;--border:#27272a;--danger:#ef4444}
-{box-sizing:border-box;margin:0;padding:0;outline:none;font-family:'Inter',system-ui,-apple-system,sans-serif}
-body{background-color:var(--bg);color:var(--text);display:flex;justify-content:center;min-height:100vh;padding:20px}
-.app-container{width:100%;max-width:900px;display:grid;gap:24px;grid-template-columns:1fr}
-@media(min-width:768px){.app-container{grid-template-columns:340px 1fr}}
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 10px 15px -3px rgba(0,0,0,0.3)}
-h1{font-size:1.2rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
-.badge{font-size:0.7rem;background:var(--primary);padding:2px 8px;border-radius:12px;text-transform:uppercase}
-.input-group{display:flex;flex-direction:column;gap:6px}
-label{font-size:0.75rem;color:var(--sub);font-weight:600;text-transform:uppercase}
-input,select{background:#27272a;border:1px solid #3f3f46;color:#fff;padding:10px 12px;border-radius:8px;font-size:0.9rem}
-input:focus,select:focus{border-color:var(--primary)}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.checkbox-wrapper{display:flex;align-items:center;gap:10px;padding:12px;background:#27272a;border-radius:8px;cursor:pointer;border:1px solid #3f3f46}
-input[type="checkbox"]{width:16px;height:16px;accent-color:var(--primary)}
-button{padding:12px;border-radius:8px;border:none;font-weight:700;cursor:pointer;transition:all .2s;font-size:0.9rem}
+:root{
+  --bg:#09090b;
+  --surface:#18181b;
+  --primary:#3b82f6;
+  --primary-hover:#2563eb;
+  --text:#e4e4e7;
+  --sub:#a1a1aa;
+  --success:#22c55e;
+  --border:#27272a;
+  --danger:#ef4444;
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:system-ui,-apple-system,sans-serif;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  justify-content:center;
+  min-height:100vh;
+  padding:20px;
+}
+
+.app-container{
+  width:100%;
+  max-width:900px;
+  display:grid;
+  gap:24px;
+}
+
+@media(min-width:768px){
+  .app-container{grid-template-columns:340px 1fr}
+}
+
+.panel{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+h1,h2{color:#fff}
+
+.input-group{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+label{
+  font-size:.75rem;
+  color:var(--sub);
+  font-weight:600;
+  text-transform:uppercase;
+}
+
+input,select{
+  background:#27272a;
+  border:1px solid #3f3f46;
+  color:#fff;
+  padding:10px;
+  border-radius:8px;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.checkbox-wrapper{
+  display:flex;
+  gap:10px;
+  padding:12px;
+  background:#27272a;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+button{
+  padding:12px;
+  border-radius:8px;
+  border:none;
+  font-weight:700;
+  cursor:pointer;
+}
+
 .btn-primary{background:var(--primary);color:#fff}
-.btn-primary:hover:not(:disabled){background:var(--primary-hover)}
 .btn-danger{background:var(--danger);color:#fff;display:none}
-.btn-danger:hover{background:#dc2626}
-button:disabled{opacity:0.5;cursor:not-allowed}
-.results-area{flex:1;display:flex;flex-direction:column;min-height:550px}
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.stat-box{background:#27272a;padding:10px;border-radius:8px;text-align:center;border:1px solid var(--border)}
-.stat-val{display:block;font-family:'JetBrains Mono',monospace;font-size:1.1rem;color:#fff;font-weight:700}
-.stat-lbl{font-size:0.7rem;color:var(--sub);text-transform:uppercase}
-.nick-list{flex:1;overflow-y:auto;background:#0f0f12;border-radius:8px;border:1px solid var(--border);padding:0;margin-top:10px}
-.nick-item{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #27272a;animation:slideIn 0.2s ease-out}
-.nick-text{font-family:'JetBrains Mono',monospace;color:var(--success);font-weight:700;font-size:1.05rem}
-.api-tag{font-size:0.65rem;background:#27272a;padding:2px 6px;border-radius:4px;color:var(--sub);margin-left:8px}
-.copy-btn{background:transparent;border:1px solid var(--sub);color:var(--sub);padding:4px 10px;font-size:0.75rem;border-radius:6px}
-.copy-btn:hover{border-color:var(--success);color:var(--success)}
-@keyframes slideIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:10px}
+
+.results-area{min-height:550px}
+
+.nick-list{
+  flex:1;
+  overflow:auto;
+  background:#0f0f12;
+  border-radius:8px;
+  border:1px solid var(--border);
+}
+
+.nick-item{
+  display:flex;
+  justify-content:space-between;
+  padding:12px;
+  border-bottom:1px solid #27272a;
+}
+
+.nick-text{
+  color:var(--success);
+  font-weight:700;
+  font-family:monospace;
+}
+
+.copy-btn{
+  background:none;
+  border:1px solid var(--sub);
+  color:var(--sub);
+  padding:4px 8px;
+  border-radius:6px;
+}
 </style>
 </head>
+
 <body>
 <div class="app-container">
+
 <section class="panel">
-<h1>Gerador v7 <span class="badge">MAX</span></h1>
+<h1>Gerador v7</h1>
+
 <div class="row">
+  <div class="input-group">
+    <label>Tamanho</label>
+    <div class="row">
+      <input type="number" id="lenMin" value="3" min="3" max="16">
+      <input type="number" id="lenMax" value="5" min="3" max="16">
+    </div>
+  </div>
+  <div class="input-group">
+    <label>Quantidade</label>
+    <input type="number" id="amount" value="10" min="1">
+  </div>
+</div>
+
 <div class="input-group">
-<label>Tamanho</label>
-<div style="display:flex;gap:5px">
-<input type="number" id="lenMin" value="3" min="3" max="16">
-<input type="number" id="lenMax" value="3" min="3" max="16">
+  <label>Prefixo</label>
+  <input type="text" id="prefix" maxlength="3">
 </div>
-</div>
+
 <div class="input-group">
-<label>Quantidade</label>
-<input type="number" id="amount" value="10" min="1">
+  <label>Algoritmo</label>
+  <select id="algo">
+    <option value="random">Aleatório</option>
+    <option value="pronounce">Pronunciável</option>
+    <option value="mixed">Alfanumérico</option>
+    <option value="num_suffix">Num + Letra</option>
+  </select>
 </div>
-</div>
-<div class="input-group">
-<label>Prefixo (Opcional)</label>
-<input type="text" id="prefix" maxlength="3" placeholder="Ex: z">
-</div>
-<div class="input-group">
-<label>Algoritmo</label>
-<select id="algo">
-<option value="random">Aleatório (A-Z)</option>
-<option value="pronounce">Pronunciável (Realista)</option>
-<option value="mixed">Alfanumérico (A-Z, 0-9)</option>
-<option value="og">OG/Raro (Sem números)</option>
-<option value="num_suffix">Numérico + Letra Final (Ex: 123a)</option>
-</select>
-</div>
+
 <label class="checkbox-wrapper">
-<input type="checkbox" id="underscore">
-<span>Usar Underscore (_)</span>
+  <input type="checkbox" id="underscore">
+  Usar underscore
 </label>
+
 <label class="checkbox-wrapper">
-<input type="checkbox" id="turbo">
-<span>Modo Turbo (Rápido)</span>
+  <input type="checkbox" id="turbo">
+  Modo turbo
 </label>
-<button id="btnStart" class="btn-primary">INICIAR BUSCA</button>
+
+<button id="btnStart" class="btn-primary">INICIAR</button>
 <button id="btnStop" class="btn-danger">PARAR</button>
 </section>
 
 <section class="panel results-area">
 <h2>Disponíveis</h2>
-<div class="stats-grid">
-<div class="stat-box">
-<span class="stat-val" id="statRate">0</span>
-<span class="stat-lbl">Checks/s</span>
-</div>
-<div class="stat-box">
-<span class="stat-val" id="statFound">0 / 0</span>
-<span class="stat-lbl">Encontrados</span>
-</div>
-</div>
 <ul id="list" class="nick-list"></ul>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:auto">
-<button id="btnCopy" class="btn-primary" style="background:#3f3f46" disabled>Copiar Lista</button>
-<button id="btnDown" class="btn-primary" style="background:#3f3f46" disabled>Baixar .txt</button>
-</div>
 </section>
+
 </div>
-<script src="script.js"></script>
-</body>
-</html>
-
-script.js
-
-const $ = id => document.getElementById(id);
-
-/ =======================
-ESTADO CENTRAL
-======================= /
-const state = {
-running: false,
-found: 0,
-attempts: 0,
-target: 0,
-startTs: 0,
-active: 0,
-cache: new Set()
-};
-
-/ =======================
-ELEMENTOS
-======================= /
-const dom = {
-start: $('btnStart'),
-stop: $('btnStop'),
-list: $('list'),
-rate: $('statRate'),
-count: $('statFound'),
-copy: $('btnCopy'),
-save: $('btnDown'),
-min: $('lenMin'),
-max: $('lenMax'),
-amt: $('amount'),
-pre: $('prefix'),
-algo: $('algo'),
-und: $('underscore'),
-turbo: $('turbo')
-};
-
-/ =======================
-VALIDAÇÃO
-======================= /
-function validateInputs() {
-const min = +dom.min.value;
-const max = +dom.max.value;
-const amt = +dom.amt.value;
-
-if (min < 3 || max > 16) {
-alert('O tamanho do nick deve ser entre 3 e 16.');
-return false;
-}
-if (min > max) {
-alert('O tamanho mínimo não pode ser maior que o máximo.');
-return false;
-}
-if (amt <= 0 || amt > 5000) {
-alert('Quantidade inválida (máx 5000).');
-return false;
-}
-return true;
-}
-
-/ =======================
-GERAÇÃO DE NICKS
-======================= /
-const chars = {
-v: 'aeiou',
-c: 'bcdfghjklmnpqrstvwxyz',
-a: 'abcdefghijklmnopqrstuvwxyz',
-n: '0123456789'
-};
-
-const rnd = str => str[Math.floor(Math.random() * str.length)];
-
-function makeNick(min, max, type, pre, useUnd) {
-const len = Math.floor(Math.random() * (max - min + 1)) + min;
-let nick = pre.toLowerCase();
-
-if (nick.length >= len) return nick.slice(0, len);
-let rem = len - nick.length;
-
-if (type === 'pronounce') {
-let vowel = nick.length
-? !chars.v.includes(nick.slice(-1))
-: Math.random() > 0.5;
-
-while (rem--) {
-nick += rnd(vowel ? chars.v : chars.c);
-vowel = !vowel;
-}
-} else if (type === 'num_suffix') {
-while (rem-- > 1) nick += rnd(chars.n);
-nick += rnd(chars.a);
-} else {
-let pool = chars.a + (type === 'mixed' ? chars.n : '');
-while (rem--) nick += rnd(pool);
-}
-
-if (useUnd && nick.length > 3 && !nick.includes('') && Math.random() > 0.65) {
-const i = Math.floor(Math.random() * (nick.length - 2)) + 1;
-nick = nick.slice(0, i) + '' + nick.slice(i + 1);
-}
-
-return nick.toLowerCase(); // 🔥 garante lowercase
-}
-
-/ =======================
-VERIFICAÇÃO (CORRIGIDA)
-======================= /
-function checkImage(url, timeout = 2000) {
-return new Promise(resolve => {
-const img = new Image();
-let done = false;
-
-const finish = res => {
-if (!done) {
-done = true;
-img.src = '';
-resolve(res);
-}
-};
-
-img.onload = () => finish(false); // Ocupado
-img.onerror = () => finish(true); // Livre
-img.src = ${url}&amp;t=${Date.now()};
-
-setTimeout(() => finish(false), timeout);
-});
-}
-
-async function checkFetch(url, timeout = 1500) {
-const ctrl = new AbortController();
-const id = setTimeout(() => ctrl.abort(), timeout);
-
-try {
-const res = await fetch(url, {
-cache: 'no-store',
-signal: ctrl.signal
-});
-return res.status === 404 || res.status === 204;
-} catch {
-return false;
-} finally {
-clearTimeout(id);
-}
-}
-
-async function verifyNick(nick) {
-// 🔥 NORMALIZAÇÃO CASE-INSENSITIVE
-const normalized = nick.toLowerCase();
-
-const freeCrafatar = await checkImage(
-https://crafatar.com/avatars/${normalized}?overlay&amp;size=32
-);
-
-if (!freeCrafatar) return false;
-
-return checkFetch(
-https://api.ashcon.app/mojang/v2/user/${normalized}
-);
-}
-
-/ =======================
-UI
-======================= /
-function uiAdd(nick) {
-const li = document.createElement('li');
-li.className = 'nick-item';
-li.innerHTML = </div><div> &lt;div&gt;</div><div> &lt;span class="nick-text"&gt;${nick}&lt;/span&gt;</div><div> &lt;span class="api-tag"&gt;LIVRE&lt;/span&gt;</div><div> &lt;/div&gt;</div><div> &lt;button class="copy-btn"&gt;Copiar&lt;/button&gt;</div><div> ;
-
-li.querySelector('button').onclick = e => {
-navigator.clipboard.writeText(nick);
-e.target.textContent = 'Copiado';
-setTimeout(() => e.target.textContent = 'Copiar', 1000);
-};
-
-dom.list.prepend(li);
-if (dom.list.children.length > 200) dom.list.lastChild.remove();
-dom.copy.disabled = dom.save.disabled = false;
-}
-
-/ =======================
-ENGINE
-======================= /
-async function engineLoop() {
-const maxConc = dom.turbo.checked ? 35 : 15;
-
-while (true) {
-if (!state.running || state.found >= state.target) break;
-
-if (state.active >= maxConc) {
-await new Promise(r => setTimeout(r, 40));
-continue;
-}
-
-state.active++;
-
-const min = +dom.min.value;
-const max = +dom.max.value;
-const type = dom.algo.value;
-const pre = dom.pre.value.trim();
-const und = dom.und.checked;
-
-let nick;
-let safety = 0;
-do {
-nick = makeNick(min, max, type, pre, und);
-safety++;
-} while (state.cache.has(nick) && safety < 100);
-
-if (safety >= 100) {
-state.active--;
-await new Promise(r => setTimeout(r, 100));
-continue;
-}
-
-state.cache.add(nick);
-if (state.cache.size > 50000) state.cache.clear();
-
-verifyNick(nick).then(free => {
-state.attempts++;
-if (free && state.running && state.found < state.target) {
-state.found++;
-uiAdd(nick);
-}
-}).finally(() => {
-state.active--;
-});
-}
-
-const waitEnd = setInterval(() => {
-if (!state.running || state.active === 0) {
-clearInterval(waitEnd);
-toggle(false);
-}
-}, 300);
-}
-
-/ =======================
-STATS
-======================= /
-function statsLoop() {
-if (!state.running) return;
-const t = (Date.now() - state.startTs) / 1000;
-dom.rate.textContent = Math.floor(state.attempts / (t || 1));
-dom.count.textContent = ${state.found} / ${state.target};
-requestAnimationFrame(statsLoop);
-}
-
-/ =======================
-CONTROLES
-======================= /
-function toggle(on) {
-if (state.running === on) return;
-
-state.running = on;
-dom.start.style.display = on ? 'none' : 'block';
-dom.stop.style.display = on ? 'block' : 'none';
-
-if (on) {
-if (!validateInputs()) return toggle(false);
-
-state.found = 0;
-state.attempts = 0;
-state.active = 0;
-state.target = +dom.amt.value;
-state.startTs = Date.now();
-state.cache.clear();
-dom.list.innerHTML = '';
-
-engineLoop();
-statsLoop();
-}
-}
-
-dom.start.onclick = () => toggle(true);
-dom.stop.onclick = () => toggle(false);
-
-/ =======================
-AÇÕES
-======================= */
-dom.copy.onclick = () => {
-const txt = [...dom.list.querySelectorAll('.nick-text')]
-.map(e => e.textContent).join('\n');
-navigator.clipboard.writeText(txt);
-};
-
-dom.save.onclick = () => {
-const txt = [...dom.list.querySelectorAll('.nick-text')]
-.map(e => e.textContent).join('\n');
-const blob = new Blob([txt], { type: 'text/plain' });
-const a = document.createElement('a');
-a.href = URL.createObjectURL(blob);
-a.download = nicks_${Date.now()}.txt;
-a.click();
-}
-Vou dividir a resposta em 3 partes:
-
-Problemas / pontos fracos (HTML, CSS e JS)
-Código melhorado (HTML + JS)
-Relatório detalhado de tudo que foi alterado / sugerido
-1. Análise rígida – O que dá para melhorar
-
-HTML
-
-Pontos positivos
-
-Estrutura semântica básica correta (<!DOCTYPE html>, lang="pt-br", meta viewport).
-Layout bem organizado, classes coerentes.
-IDs e elementos mapeados corretamente no JS.
-Problemas / Melhorias
-
-Acessibilidade fraca
-
-<label> sem atributo for, então leitores de tela não associam aos inputs.
-Botões só com texto, sem aria-* ou feedback adicional.
-Nenhum foco visual customizado (usa apenas padrão do navegador).
-Repetição / estilo inline
-
-Muitos estilos inline (style="display:flex;gap:5px", style="background:#3f3f46"), melhor mover para CSS.
-h2 não tem estilo próprio, poderia padronizar tipografia.
-Estrutura semântica
-
-Estaria melhor ter <main> envolvendo o app, <header> para o título.
-Títulos: h1 + h2 ok, mas poderia ter melhor hierarquia se crescer o projeto.
-Formulário sem <form>
-
-Inputs e botões são usados como se fossem parte de um formulário, mas não há <form>.
-Isso impede comportamento padrão de submit (Enter para iniciar, etc).
-Falta de mensagens de erro mais elegantes
-
-Na validação, usa apenas alert(). UX pobre, invasivo.
-CSS
-
-Pontos positivos
-
-Uso de CSS custom properties (:root{--bg:...}) muito bom.
-Layout responsivo com grid e media queries simples e eficaz.
-Coerência visual e tipográfica.
-Problemas / Melhorias
-
-Acessibilidade de foco
-
-outline:none em * remove o foco padrão e não adiciona outro visual.
-Isso é péssimo para keyboard users.
-Escalabilidade
-
-Todo CSS está inline no HTML. Se crescer, fica ruim de manter.
-Poderia separar em style.css.
-Repetição
-
-Alguns paddings/margins inline poderiam ser classes.
-Botões com cor customizada via style ao invés de classes (style="background:#3f3f46").
-body com display flex centralizando tudo
-
-Funciona, mas limita se você quiser incluir header/footer fixos no futuro.
-Seria melhor centralizar apenas .app-container.
-JavaScript
-
-Pontos positivos
-
-Código bem organizado em seções comentadas.
-state central bem definido.
-dom object pattern para cachear elementos – bom para manutenção.
-Engine assíncrona com controle de concorrência (state.active, maxConc).
-Uso de requestAnimationFrame para stats.
-Cache de nicks (state.cache) para evitar repetições.
-Problemas / Melhorias
-
-toggle(true) com bug de fluxo
-
-Dentro de toggle(true), você faz:
-
-if (on) {
-    if (!validateInputs()) return toggle(false);
-    ...
-}
-Se a validação falhar, você chama toggle(false) dentro de toggle(true) enquanto state.running já foi mudado. Isso funciona, mas é confuso e arriscado (efeito colateral dentro da própria função).
-Melhor validar antes de mudar estado.
-
-Validação fraca / incompleta
-
-Prefixo (pre) não validado (pode ter espaços, caracteres estranhos).
-Não impede combinações impossíveis (por exemplo, min=20 via manipulação do DOM mesmo com max="16" no HTML).
-Só mostra erros via alert (UX ruim).
-engineLoop com while(true) + timers
-
-Usa while(true) + await setTimeout para throttle. Funciona, mas:
-Mais difícil de ler.
-Não cancela as Promises de verificação que já foram disparadas quando o usuário clica em “PARAR”.
-Ideal seria um laço que respeita state.running e alguma forma de abortar checks em andamento (por ex. AbortController global, ou flag local).
-checkImage / checkFetch – Suposições frágeis
-
-Suposição: onerror na imagem = nick livre; onload = ocupado. Pode quebrar se o serviço mudar comportamento (p.ex. cache redirect).
-checkFetch considera apenas 404 ou 204 como livre – ok para agora, mas poderia isolar esse conhecimento em uma função de regra (isFreeStatus).
-Falta de tratamento de erros no fluxo principal
-
-Em verifyNick, qualquer falha de rede em checkFetch retorna false (ocupado).
-Você poderia distinguir “erro” de “ocupado”, para talvez repetir depois ou logar.
-Acessibilidade / UX de ações
-
-Botões “Copiar Lista” e “Baixar .txt” continuam habilitados mesmo se o usuário parar e não houver resultados novos futuros (está ok, mas poderia manter contagem).
-Não há feedback visual global ao copiar lista inteira (só copia silenciosamente).
-Micro detalhes
-
-checkImage usa setTimeout(() => finish(false), timeout); mas se o timeout estoura, você assume “ocupado”. Poderia registrar como “indefinido/erro” e talvez tentar outro nick, ao invés de contaminar a taxa de sucesso.
-engineLoop lê os inputs (min, max, etc.) a cada iteração – ok, mas se quiser performance máxima poderia capturar snapshot no início da execução e não depender de mudança de UI no meio.
-2. Código melhorado
-
-index.html (versão melhorada – focada em boas práticas, acessibilidade e limpeza)
-
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MC Nick Gen v7 (CORS Bypass)</title>
-    <style>
-        :root {
-            --bg:#09090b;
-            --surface:#18181b;
-            --primary:#3b82f6;
-            --primary-hover:#2563eb;
-            --text:#e4e4e7;
-            --sub:#a1a1aa;
-            --success:#22c55e;
-            --border:#27272a;
-            --danger:#ef4444;
-        }
-        * {
-            box-sizing:border-box;
-            margin:0;
-            padding:0;
-            font-family:'Inter',system-ui,-apple-system,sans-serif;
-        }
-        body {
-            background-color:var(--bg);
-            color:var(--text);
-            min-height:100vh;
-            padding:20px;
-            display:flex;
-            justify-content:center;
-        }
-        .app-container {
-            width:100%;
-            max-width:900px;
-            display:grid;
-            gap:24px;
-            grid-template-columns:1fr;
-        }
-        @media(min-width:768px){
-            .app-container{
-                grid-template-columns:340px 1fr;
-            }
-        }
-        .panel {
-            background:var(--surface);
-            border:1px solid var(--border);
-            border-radius:16px;
-            padding:24px;
-            display:flex;
-            flex-direction:column;
-            gap:16px;
-            box-shadow:0 10px 15px -3px rgba(0,0,0,0.3);
-        }
-        h1 {
-            font-size:1.2rem;
-            font-weight:700;
-            color:#fff;
-            display:flex;
-            align-items:center;
-            gap:8px;
-        }
-        h2 {
-            font-size:1rem;
-            font-weight:600;
-        }
-        .badge {
-            font-size:0.7rem;
-            background:var(--primary);
-            padding:2px 8px;
-            border-radius:12px;
-            text-transform:uppercase;
-        }
-        .input-group {
-            display:flex;
-            flex-direction:column;
-            gap:6px;
-        }
-        label {
-            font-size:0.75rem;
-            color:var(--sub);
-            font-weight:600;
-            text-transform:uppercase;
-        }
-        input,select {
-            background:#27272a;
-            border:1px solid #3f3f46;
-            color:#fff;
-            padding:10px 12px;
-            border-radius:8px;
-            font-size:0.9rem;
-        }
-        input:focus,select:focus,button:focus {
-            outline:2px solid var(--primary);
-            outline-offset:2px;
-        }
-        .row {
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:12px;
-        }
-        .inline-row {
-            display:flex;
-            gap:5px;
-        }
-        .checkbox-wrapper {
-            display:flex;
-            align-items:center;
-            gap:10px;
-            padding:12px;
-            background:#27272a;
-            border-radius:8px;
-            cursor:pointer;
-            border:1px solid #3f3f46;
-        }
-        input[type="checkbox"] {
-            width:16px;
-            height:16px;
-            accent-color:var(--primary);
-        }
-        button {
-            padding:12px;
-            border-radius:8px;
-            border:none;
-            font-weight:700;
-            cursor:pointer;
-            transition:all .2s;
-            font-size:0.9rem;
-        }
-        .btn-primary {
-            background:var(--primary);
-            color:#fff;
-        }
-        .btn-primary-alt {
-            background:#3f3f46;
-            color:#fff;
-        }
-        .btn-primary:hover:not(:disabled) {
-            background:var(--primary-hover);
-        }
-        .btn-danger {
-            background:var(--danger);
-            color:#fff;
-            display:none;
-        }
-        .btn-danger:hover {
-            background:#dc2626;
-        }
-        button:disabled {
-            opacity:0.5;
-            cursor:not-allowed;
-        }
-        .results-area {
-            flex:1;
-            display:flex;
-            flex-direction:column;
-            min-height:550px;
-        }
-        .stats-grid {
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:8px;
-        }
-        .stat-box {
-            background:#27272a;
-            padding:10px;
-            border-radius:8px;
-            text-align:center;
-            border:1px solid var(--border);
-        }
-        .stat-val {
-            display:block;
-            font-family:'JetBrains Mono',monospace;
-            font-size:1.1rem;
-            color:#fff;
-            font-weight:700;
-        }
-        .stat-lbl {
-            font-size:0.7rem;
-            color:var(--sub);
-            text-transform:uppercase;
-        }
-        .nick-list {
-            flex:1;
-            overflow-y:auto;
-            background:#0f0f12;
-            border-radius:8px;
-            border:1px solid var(--border);
-            padding:0;
-            margin-top:10px;
-            list-style:none;
-        }
-        .nick-item {
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            padding:12px 16px;
-            border-bottom:1px solid #27272a;
-            animation:slideIn 0.2s ease-out;
-        }
-        .nick-text {
-            font-family:'JetBrains Mono',monospace;
-            color:var(--success);
-            font-weight:700;
-            font-size:1.05rem;
-        }
-        .api-tag {
-            font-size:0.65rem;
-            background:#27272a;
-            padding:2px 6px;
-            border-radius:4px;
-            color:var(--sub);
-            margin-left:8px;
-        }
-        .copy-btn {
-            background:transparent;
-            border:1px solid var(--sub);
-            color:var(--sub);
-            padding:4px 10px;
-            font-size:0.75rem;
-            border-radius:6px;
-        }
-        .copy-btn:hover {
-            border-color:var(--success);
-            color:var(--success);
-        }
-        .actions-row {
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:12px;
-            margin-top:auto;
-        }
-        .error-msg {
-            font-size:0.8rem;
-            color:#f97316;
-            min-height:1em;
-        }
-        @keyframes slideIn {
-            from {opacity:0;transform:translateY(5px)}
-            to {opacity:1;transform:translateY(0)}
-        }
-        ::-webkit-scrollbar {width:6px}
-        ::-webkit-scrollbar-track {background:transparent}
-        ::-webkit-scrollbar-thumb {background:#3f3f46;border-radius:10px}
-    </style>
-</head>
-<body>
-<main class="app-container" aria-label="Gerador de Nicks Minecraft">
-    <section class="panel" aria-labelledby="title-main">
-        <h1 id="title-main">Gerador v7 <span class="badge">MAX</span></h1>
-
-        <div id="formError" class="error-msg" aria-live="polite"></div>
-
-        <div class="row">
-            <div class="input-group">
-                <label for="lenMin">Tamanho (mín / máx)</label>
-                <div class="inline-row">
-                    <input type="number" id="lenMin" value="3" min="3" max="16" aria-label="Tamanho mínimo do nick">
-                    <input type="number" id="lenMax" value="3" min="3" max="16" aria-label="Tamanho máximo do nick">
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label for="amount">Quantidade</label>
-                <input type="number" id="amount" value="10" min="1" max="5000" aria-label="Quantidade de nicks a buscar">
-            </div>
-        </div>
-
-        <div class="input-group">
-            <label for="prefix">Prefixo (Opcional)</label>
-            <input type="text" id="prefix" maxlength="3" placeholder="Ex: z" aria-label="Prefixo opcional do nick">
-        </div>
-
-        <div class="input-group">
-            <label for="algo">Algoritmo</label>
-            <select id="algo" aria-label="Tipo de geração de nick">
-                <option value="random">Aleatório (A-Z)</option>
-                <option value="pronounce">Pronunciável (Realista)</option>
-                <option value="mixed">Alfanumérico (A-Z, 0-9)</option>
-                <option value="og">OG/Raro (Sem números)</option>
-                <option value="num_suffix">Numérico + Letra Final (Ex: 123a)</option>
-            </select>
-        </div>
-
-        <label class="checkbox-wrapper">
-            <input type="checkbox" id="underscore">
-            <span>Usar Underscore (_)</span>
-        </label>
-
-        <label class="checkbox-wrapper">
-            <input type="checkbox" id="turbo">
-            <span>Modo Turbo (Rápido)</span>
-        </label>
-
-        <button id="btnStart" class="btn-primary" type="button">INICIAR BUSCA</button>
-        <button id="btnStop" class="btn-danger" type="button">PARAR</button>
-    </section>
-
-    <section class="panel results-area" aria-labelledby="title-results">
-        <h2 id="title-results">Disponíveis</h2>
-
-        <div class="stats-grid" aria-live="polite">
-            <div class="stat-box">
-                <span class="stat-val" id="statRate">0</span>
-                <span class="stat-lbl">Checks/s</span>
-            </div>
-            <div class="stat-box">
-                <span class="stat-val" id="statFound">0 / 0</span>
-                <span class="stat-lbl">Encontrados</span>
-            </div>
-        </div>
-
-        <ul id="list" class="nick-list" aria-label="Lista de nicks disponíveis"></ul>
-
-        <div class="actions-row">
-            <button id="btnCopy" class="btn-primary-alt" type="button" disabled>Copiar Lista</button>
-            <button id="btnDown" class="btn-primary-alt" type="button" disabled>Baixar .txt</button>
-        </div>
-    </section>
-</main>
 
 <script src="script.js"></script>
 </body>
