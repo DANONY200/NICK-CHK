@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MC Nick Gen v7 (CORS Bypass)</title>
+    <title>MC Nick Checker v7</title>
     <style>
-        :root{--bg:#09090b;--surface:#18181b;--primary:#3b82f6;--primary-hover:#2563eb;--text:#e4e4e7;--sub:#a1a1aa;--success:#22c55e;--border:#27272a;--danger:#ef4444}
+        :root{--bg:#09090b;--surface:#18181b;--primary:#3b82f6;--primary-hover:#2563eb;--text:#e4e4e7;--sub:#a1a1aa;--success:#22c55e;--border:#27272a;--danger:#ef4444;--warning:#f59e0b}
         *{box-sizing:border-box;margin:0;padding:0;outline:none;font-family:'Inter',system-ui,-apple-system,sans-serif}
         body{background-color:var(--bg);color:var(--text);display:flex;justify-content:center;min-height:100vh;padding:20px}
         .app-container{width:100%;max-width:900px;display:grid;gap:24px;grid-template-columns:1fr}
         @media(min-width:768px){.app-container{grid-template-columns:340px 1fr}}
         .panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 10px 15px -3px rgba(0,0,0,0.3)}
         h1{font-size:1.2rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
+        h2{font-size:1rem;font-weight:600;color:#fff}
         .badge{font-size:0.7rem;background:var(--primary);padding:2px 8px;border-radius:12px;text-transform:uppercase}
         .input-group{display:flex;flex-direction:column;gap:6px}
         label{font-size:0.75rem;color:var(--sub);font-weight:600;text-transform:uppercase}
@@ -37,7 +38,23 @@
         .api-tag{font-size:0.65rem;background:#27272a;padding:2px 6px;border-radius:4px;color:var(--sub);margin-left:8px}
         .copy-btn{background:transparent;border:1px solid var(--sub);color:var(--sub);padding:4px 10px;font-size:0.75rem;border-radius:6px}
         .copy-btn:hover{border-color:var(--success);color:var(--success)}
+        
+        /* Progress Bar */
+        .progress-container{margin-top:12px;display:none}
+        .progress-bar{height:4px;background:#3f3f46;border-radius:2px;overflow:hidden}
+        .progress-fill{height:100%;background:var(--primary);width:0%;transition:width 0.3s ease}
+        .progress-text{font-size:0.7rem;color:var(--sub);margin-top:4px;text-align:center}
+        
+        /* System Status */
+        .system-status{padding:8px 12px;background:#27272a;border-radius:6px;font-size:0.75rem;color:var(--sub);margin-top:12px;display:none;align-items:center;gap:8px}
+        .status-icon{font-size:0.8rem}
+        
+        /* Error Messages */
+        .error-message{font-size:0.75rem;color:var(--danger);margin-top:4px;display:none}
+        
         @keyframes slideIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slideOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(100%)}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         ::-webkit-scrollbar{width:6px}
         ::-webkit-scrollbar-track{background:transparent}
         ::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:10px}
@@ -47,6 +64,7 @@
 <div class="app-container">
     <section class="panel">
         <h1>Gerador v7 <span class="badge">MAX</span></h1>
+        
         <div class="row">
             <div class="input-group">
                 <label>Tamanho</label>
@@ -54,16 +72,21 @@
                     <input type="number" id="lenMin" value="3" min="3" max="16">
                     <input type="number" id="lenMax" value="3" min="3" max="16">
                 </div>
+                <div class="error-message" id="lenError"></div>
             </div>
             <div class="input-group">
                 <label>Quantidade</label>
-                <input type="number" id="amount" value="10" min="1">
+                <input type="number" id="amount" value="10" min="1" max="1000">
+                <div class="error-message" id="amountError"></div>
             </div>
         </div>
+        
         <div class="input-group">
             <label>Prefixo (Opcional)</label>
             <input type="text" id="prefix" maxlength="3" placeholder="Ex: z">
+            <div class="error-message" id="prefixError"></div>
         </div>
+        
         <div class="input-group">
             <label>Algoritmo</label>
             <select id="algo">
@@ -74,14 +97,31 @@
                 <option value="num_suffix">Numérico + Letra Final (Ex: 123a)</option>
             </select>
         </div>
+        
         <label class="checkbox-wrapper">
             <input type="checkbox" id="underscore">
             <span>Usar Underscore (_)</span>
         </label>
+        
         <label class="checkbox-wrapper">
             <input type="checkbox" id="turbo">
             <span>Modo Turbo (Rápido)</span>
         </label>
+        
+        <!-- Progress Bar -->
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0/0 encontrados</div>
+        </div>
+        
+        <!-- System Status -->
+        <div class="system-status" id="systemStatus">
+            <span class="status-icon">⏳</span>
+            <span class="status-text">Pronto para iniciar</span>
+        </div>
+        
         <button id="btnStart" class="btn-primary">INICIAR BUSCA</button>
         <button id="btnStop" class="btn-danger">PARAR</button>
     </section>
