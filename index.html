@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MC Nick Checker v7</title>
     <style>
-        :root{--bg:#09090b;--surface:#18181b;--primary:#3b82f6;--primary-hover:#2563eb;--text:#e4e4e7;--sub:#a1a1aa;--success:#22c55e;--border:#27272a;--danger:#ef4444}
+        :root{--bg:#09090b;--surface:#18181b;--primary:#3b82f6;--primary-hover:#2563eb;--text:#e4e4e7;--sub:#a1a1aa;--success:#22c55e;--border:#27272a;--danger:#ef4444;--warning:#f59e0b}
         *{box-sizing:border-box;margin:0;padding:0;outline:none;font-family:'Inter',system-ui,-apple-system,sans-serif}
         body{background-color:var(--bg);color:var(--text);display:flex;justify-content:center;min-height:100vh;padding:20px}
         .app-container{width:100%;max-width:900px;display:grid;gap:24px;grid-template-columns:1fr}
@@ -37,7 +37,21 @@
         .api-tag{font-size:0.65rem;background:#27272a;padding:2px 6px;border-radius:4px;color:var(--sub);margin-left:8px}
         .copy-btn{background:transparent;border:1px solid var(--sub);color:var(--sub);padding:4px 10px;font-size:0.75rem;border-radius:6px}
         .copy-btn:hover{border-color:var(--success);color:var(--success)}
+        
+        /* Progress Bar */
+        .progress-container{margin-top:12px}
+        .progress-bar{height:4px;background:#3f3f46;border-radius:2px;overflow:hidden;margin-bottom:4px}
+        .progress-fill{height:100%;background:var(--primary);width:0%;transition:width 0.3s ease}
+        .progress-text{font-size:0.7rem;color:var(--sub);text-align:center}
+        
+        /* Toast Notifications */
+        .toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:8px;z-index:1000;animation:slideInRight 0.3s ease-out;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+        .toast-success{background:var(--success);color:white}
+        .toast-error{background:var(--danger);color:white}
+        .toast-info{background:var(--primary);color:white}
+        
         @keyframes slideIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slideInRight{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
         ::-webkit-scrollbar{width:6px}
         ::-webkit-scrollbar-track{background:transparent}
         ::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:10px}
@@ -46,10 +60,10 @@
 <body>
 <div class="app-container">
     <section class="panel">
-        <h1>Gerador v7 <span class="badge">MAX</span></h1>
+        <h1>MC Nick Checker v7 <span class="badge">ULTRA</span></h1>
         <div class="row">
             <div class="input-group">
-                <label>Tamanho</label>
+                <label>Tamanho (3-16)</label>
                 <div style="display:flex;gap:5px">
                     <input type="number" id="lenMin" value="3" min="3" max="16">
                     <input type="number" id="lenMax" value="3" min="3" max="16">
@@ -57,7 +71,7 @@
             </div>
             <div class="input-group">
                 <label>Quantidade</label>
-                <input type="number" id="amount" value="10" min="1" max="5000">
+                <input type="number" id="amount" value="10" min="1" max="10000">
             </div>
         </div>
         <div class="input-group">
@@ -79,11 +93,20 @@
             <span>Usar Underscore (_)</span>
         </label>
         <label class="checkbox-wrapper">
-            <input type="checkbox" id="turbo">
+            <input type="checkbox" id="turbo" checked>
             <span>Modo Turbo (Rápido)</span>
         </label>
-        <button id="btnStart" class="btn-primary">INICIAR BUSCA</button>
-        <button id="btnStop" class="btn-danger">PARAR</button>
+        
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Pronto para iniciar</div>
+        </div>
+        
+        <button id="btnStart" class="btn-primary">🚀 INICIAR BUSCA</button>
+        <button id="btnStop" class="btn-danger">⏹️ PARAR</button>
     </section>
 
     <section class="panel results-area">
@@ -100,8 +123,14 @@
         </div>
         <ul id="list" class="nick-list"></ul>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:auto">
-            <button id="btnCopy" class="btn-primary" style="background:#3f3f46" disabled>Copiar Lista</button>
-            <button id="btnDown" class="btn-primary" style="background:#3f3f46" disabled>Baixar .txt</button>
+            <button id="btnCopy" class="btn-primary" style="background:#3f3f46" disabled>
+                <span>📋 Copiar Lista</span>
+                <span id="copyCount" style="font-size:0.7rem;opacity:0.8;margin-left:4px">(0)</span>
+            </button>
+            <button id="btnDown" class="btn-primary" style="background:#3f3f46" disabled>
+                <span>💾 Baixar .txt</span>
+                <span id="downloadCount" style="font-size:0.7rem;opacity:0.8;margin-left:4px">(0)</span>
+            </button>
         </div>
     </section>
 </div>
