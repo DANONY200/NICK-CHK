@@ -3,75 +3,92 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MC Nick Gen v8 (Smart)</title>
+<title>MC Nick Gen Ultimate</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+
+<div class="glow-bg"></div>
+
 <div class="app-container">
 
   <section class="panel control-panel">
     <div class="header-row">
-      <h1>Gerador v8 <span class="tag">Smart</span></h1>
+      <h1>MC GEN <span class="badge-ultimate">ULTIMATE</span></h1>
       <div class="stats-mini">
-        <span id="stat-attempts">0</span> tentativas
+        <span id="stat-attempts">0</span> verificados
       </div>
     </div>
 
-    <div class="row">
+    <div class="grid-2">
       <div class="input-group">
-        <label>Tamanho (Min-Max)</label>
-        <div class="row">
+        <label>Letras (Min - Máx)</label>
+        <div class="input-row">
           <input type="number" id="lenMin" value="3" min="3" max="16">
+          <span class="sep">-</span>
           <input type="number" id="lenMax" value="5" min="3" max="16">
         </div>
       </div>
       <div class="input-group">
-        <label>Meta de Nicks</label>
+        <label>Quantidade</label>
         <input type="number" id="amount" value="10" min="1">
       </div>
     </div>
 
     <div class="input-group">
-      <label>Prefixo (Opcional)</label>
-      <input type="text" id="prefix" maxlength="3" placeholder="ex: PvP">
+      <label>Começar com (Opcional)</label>
+      <input type="text" id="prefix" maxlength="3" placeholder="Ex: Sr, Rei, PvP...">
     </div>
 
     <div class="input-group">
-      <label>Algoritmo</label>
+      <label>Estilo do Nick</label>
       <select id="algo">
-        <option value="pronounce">Pronunciável (Recomendado)</option>
-        <option value="random">Totalmente Aleatório</option>
-        <option value="mixed">Alfanumérico</option>
-        <option value="num_suffix">Numérico + Sufixo</option>
+        <option value="pronounce">Real (Parece nome de verdade)</option>
+        <option value="random">Aleatório (Qualquer coisa)</option>
+        <option value="mixed">Letras e Números</option>
+        <option value="num_suffix">Números + Letra</option>
       </select>
     </div>
 
-    <div class="row-checkbox">
-      <label class="checkbox-wrapper">
+    <div class="options-grid">
+      <label class="custom-check">
         <input type="checkbox" id="underscore">
-        <span>Underscore (_)</span>
+        <span class="checkmark"></span>
+        Usar traço (_)
       </label>
-      <label class="checkbox-wrapper">
+      <label class="custom-check">
         <input type="checkbox" id="turbo">
-        <span>Modo Turbo ⚡</span>
+        <span class="checkmark turbo-check"></span>
+        Modo Turbo ⚡
       </label>
     </div>
 
-    <div id="statusBar" class="status-bar status-idle">Pronto para iniciar</div>
+    <div id="statusBar" class="status-bar status-idle">
+      <span class="status-dot"></span>
+      <span id="statusText">Aguardando início...</span>
+    </div>
 
-    <div class="action-buttons">
-      <button id="btnStart" class="btn-primary">INICIAR</button>
-      <button id="btnStop" class="btn-danger">PARAR</button>
+    <div class="action-area">
+      <button id="btnStart" class="btn-main">INICIAR BUSCA</button>
+      <button id="btnStop" class="btn-stop" style="display:none">PARAR</button>
     </div>
   </section>
 
   <section class="panel results-area">
     <div class="results-header">
-      <h2>Disponíveis (<span id="foundCount">0</span>)</h2>
-      <button id="btnDownload" class="btn-secondary" disabled>Baixar .txt</button>
+      <h2>Encontrados <span id="foundCount" class="count-badge">0</span></h2>
+      <button id="btnDownload" class="btn-link" disabled>Baixar Lista</button>
     </div>
-    <ul id="list" class="nick-list"></ul>
+    
+    <div class="list-container">
+      <ul id="list" class="nick-list">
+        </ul>
+      <div id="emptyState" class="empty-state">
+        Os nicks disponíveis aparecerão aqui.
+      </div>
+    </div>
   </section>
 
 </div>
