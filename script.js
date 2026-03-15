@@ -1,8 +1,4 @@
 const $ = id => document.getElementById(id);
-
-/* =======================
-   ESTADO
-======================= */
 const state = {
   running: false,
   cooldown: false,
@@ -13,10 +9,6 @@ const state = {
   cache: new Set(),
   foundList: []
 };
-
-/* =======================
-   ELEMENTOS
-======================= */
 const dom = {
   start: $('btnStart'),
   stop: $('btnStop'),
@@ -35,10 +27,6 @@ const dom = {
   foundCount: $('foundCount'),
   download: $('btnDownload')
 };
-
-/* =======================
-   UTILITÁRIOS
-======================= */
 const chars = {
   v: 'aeiou',
   c: 'bcdfghjklmnpqrstvwxyz',
@@ -55,10 +43,6 @@ function updateStatus(type, msg) {
   dom.statusBar.className = `status-bar status-${type}`;
   dom.statusText.textContent = msg;
 }
-
-/* =======================
-   LÓGICA DE CRIAÇÃO
-======================= */
 function makeNick(min, max, type, pre, useUnd) {
   const len = Math.floor(Math.random() * (max - min + 1)) + min;
   let nick = normalize(pre);
@@ -73,10 +57,8 @@ function makeNick(min, max, type, pre, useUnd) {
       nick += rnd(chars.n);
       rem--;
     }
-    // Adiciona a letra final
     nick += rnd(chars.a);
   } 
-  // Lógica: Pronunciável
   else if (type === 'pronounce') {
     let isVowel = nick.length > 0 ? !chars.v.includes(nick.slice(-1)) : Math.random() > 0.5;
     while (rem > 0) {
@@ -91,13 +73,10 @@ function makeNick(min, max, type, pre, useUnd) {
       rem--;
     }
   } 
-  // Lógica: Misto ou Aleatório
   else {
     let pool = chars.a + (type === 'mixed' ? chars.n : '');
     while (rem--) nick += rnd(pool);
   }
-
-  // Underscore
   if (useUnd && nick.length > 4 && !nick.includes('_') && Math.random() > 0.7) {
     const pos = Math.floor(Math.random() * (nick.length - 2)) + 1;
     nick = nick.slice(0, pos) + '_' + nick.slice(pos);
@@ -105,10 +84,6 @@ function makeNick(min, max, type, pre, useUnd) {
 
   return nick;
 }
-
-/* =======================
-   VERIFICAÇÃO
-======================= */
 function checkImage(nick) {
   return new Promise(resolve => {
     const img = new Image();
@@ -146,10 +121,6 @@ async function handleRateLimit() {
   state.cooldown = false;
   if(state.running) updateStatus('running', 'Buscando nicks...');
 }
-
-/* =======================
-   INTERFACE & LOOP
-======================= */
 function uiAdd(nick) {
   dom.empty.style.display = 'none';
   const li = document.createElement('li');
